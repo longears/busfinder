@@ -1,0 +1,173 @@
+
+body {
+    background: #000;
+    color: #fff;
+    margin: 0px;
+    font-size: 18px;
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+}
+
+.overallInterfaceParent {
+    width:315px;
+}
+
+.overallInterfaceChild {
+}
+
+.viewChooser {
+    background: #bbb;
+    color: #000;
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.viewName {
+    text-decoration: none;
+    color: #000;
+    display: block;
+    padding: 5px;
+}
+
+.currentViewName {
+    background: #fff;
+    border-radius: 5px;
+}
+
+.nonCurrentViewName {
+}
+
+/*--------------------------------------------------------------------------------*/
+
+
+.boardGroup {
+    margin: 5px;
+    margin-bottom: 35px;
+    padding: 5px;
+    border-top: 2px solid #fff;
+}
+
+.boardGroupTitle {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.boardGroupContents {
+}
+
+.boardContainer {
+}
+
+.boardHeader {
+    margin-top: 20px;
+}
+
+.boardTitle {
+    font-weight: bold;
+    color: #fff;
+}
+
+.lastUpdated {
+    float: right;
+    font-size: 24px;
+    color: #888;
+    padding-bottom: 2px;
+    -webkit-animation: rotation 7s infinite linear;
+}
+
+@-webkit-keyframes rotation {
+    from {-webkit-transform: rotate(0deg);}
+    to   {-webkit-transform: rotate(359deg);}
+}
+
+
+.walkTimeGroup {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    margin-left: 10px;
+}
+
+.walkTimeLabel {
+    font-style: italic;
+    color: #999;
+    font-size: 15px;
+    display: inline;
+}
+
+.walkTimeButton {
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 3px;
+    padding: 5px;
+    width: 143px;
+    text-align: center;
+}
+
+.walkTimeButtonEnabled {
+    background: #775f55;
+    color: #fff;
+}
+
+.walkTimeButtonDisabled {
+    background: #567;
+    color: #fff;
+}
+
+.busRowContainer {
+}
+
+.busRow {
+    margin-bottom: 2px;
+    padding: 5px;
+    border-radius: 3px;
+    color: #000;
+}
+
+.tooLate {
+    color: #333;
+    background: #777 !important;
+}
+
+.busRowCell {
+    display: inline-block;
+}
+
+.busRowRouteName {
+    font-size: 26px;
+    width: 50px;
+}
+
+.busRowRelativeTime {
+    font-size: 26px;
+    width: 80px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.busRowAbsoluteTime {
+    font-size: 26px;
+    width: 140px;
+    text-align: right;
+}
+
+.otherLinks {
+    float: left;
+    margin-left: 15px;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 3px;
+}
+
+.link {
+    display: block;
+    color: #9af;
+    margin: 10px;
+    text-decoration: none;
+}
+
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+
+bin/*
+include/*
+lib/*
+local/*
+
+*.pyc
+*.swp
+*.swo
+.DS_Store
+
+examples_react/*
+*.png
+
+node_modules/*
+

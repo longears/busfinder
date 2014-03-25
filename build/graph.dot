@@ -1,0 +1,35 @@
+digraph {
+    edge [len=3];
+    home -> saloon[label="walk 11m", color=orange];
+    saloon -> home[label="walk 11m", color=orange];
+    home -> loscantaros[label="walk 6m", color=orange];
+    loscantaros -> home[label="walk 6m", color=orange];
+    loscantaros -> bart19th[label="walk 20m", color=orange];
+    bart19th -> loscantaros[label="walk 20m", color=orange];
+    ferry -> explo[label="walk 11m", color=orange];
+    explo -> ferry[label="walk 11m", color=orange];
+    ferry -> bartembroutside[label="walk 5m", color=orange];
+    bartembroutside -> ferry[label="walk 5m", color=orange];
+    bartembroutside -> howardandspearoutside[label="walk 6m", color=orange];
+    howardandspearoutside -> bartembroutside[label="walk 6m", color=orange];
+    howardandspearoutside -> transbay[label="walk 4m", color=orange];
+    transbay -> howardandspearoutside[label="walk 4m", color=orange];
+    bartembr -> bartembroutside[label="walk 4m", color=orange];
+    bartembroutside -> bartembr[label="walk 4m", color=orange];
+    howardandspearoutside -> howardandspear[label="walk 4m", color=orange];
+    howardandspear -> howardandspearoutside[label="walk 4m", color=orange];
+    loscantaros -> bart19th[label="12 11m", color=forestgreen, style=bold];
+    bart19th -> loscantaros[label="12 11m", color=forestgreen, style=bold];
+    bart19th -> bartembr[label="MLBR 12m", color=blue, style=bold];
+    bart19th -> bartembr[label="SFIA 12m", color=blue, style=bold];
+    bart19th -> bartembr[label="DALY 12m", color=blue, style=bold];
+    bartembr -> bart19th[label="RICH 12m", color=blue, style=bold];
+    bartembr -> bart19th[label="PITT 12m", color=blue, style=bold];
+    saloon -> transbay[label="B 23m", color=forestgreen, style=bold];
+    saloon -> transbay[label="NL 31m", color=forestgreen, style=bold];
+    saloon -> transbay[label="NX 27m", color=forestgreen, style=bold];
+    loscantaros -> transbay[label="NL 28m", color=forestgreen, style=bold];
+    transbay -> saloon[label="B 30m", color=forestgreen, style=bold];
+    transbay -> loscantaros[label="NL 33m", color=forestgreen, style=bold];
+    transbay -> saloon[label="NX1 21m", color=forestgreen, style=bold];
+}
