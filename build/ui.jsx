@@ -5,9 +5,9 @@ var moment = require('moment');
 
 var spec = require('./spec.js');
 var routeFinder = require('./routeFinder.js');
+var config = require('./config.js');
 
 var logcolors = require('./logcolors.js')
-
 var log = logcolors.makelog('red');
 
 //--------------------------------------------------------------------------------
@@ -236,26 +236,19 @@ var TripRow = React.createClass({
 var OverallInterface = React.createClass({
     mixins: [SetIntervalMixin],
     // props:
-    //      locations
-    //      routeColors
-    //      legs
+    //      networkConfig
     getInitialState: function() {
         // build routeFinder
         log('getInitialState');
         var rf = routeFinder();
-        rf.locations = this.props.locations;
-        rf.routeColors = this.props.routeColors;
-        for (var ll=0; ll < this.props.legs.length; ll++) {
-            var leg = this.props.legs[ll];
-            rf.addLeg(leg);
-        }
+        rf.readConfig(this.props.networkConfig);
 
         var from = 'home';
         var to = 'explo';
-        console.log(readCookie('from'));
-        console.log(readCookie('to'));
-        if (readCookie('from')) {from = readCookie('from');}
-        if (readCookie('to')) {to = readCookie('to');}
+        var cookieFrom = readCookie('from');
+        var cookieTo = readCookie('to');
+        if (cookieFrom !== undefined && rf.locations[cookieFrom] !== undefined) {from = cookieFrom;}
+        if (cookieTo !== undefined && rf.locations[cookieTo] !== undefined) {to = cookieTo;}
 
         return {
             routeFinder: rf,
@@ -369,224 +362,7 @@ var OverallInterface = React.createClass({
 
 React.renderComponent(
     <OverallInterface
-        locations={{
-            work: {
-                short: 'Work',
-                long: 'Work',
-                color: '#555',
-            },
-            workoutside: {
-                short: 'Work out',
-                long: 'Work (outside)',
-                color: '#555',
-            },
-            bart19th: {
-                short: '19th',
-                long: '19th St Bart',
-                color: '#55c',
-            },
-            bartembr: {
-                short: 'Embr',
-                long: 'Embarcadero Bart',
-                color: '#229',
-            },
-            bartembroutside: {
-                short: 'Embr out',
-                long: 'Embarcadero Bart (outside)',
-                color: '#22a',
-            },
-            explo: {
-                short: 'Explo',
-                long: 'Exploratorium',
-                color: '#555',
-            },
-            ferry: {
-                short: 'Ferry',
-                long: 'Ferry Building',
-                color: '#555',
-            },
-            home: {
-                short: 'Home',
-                long: 'Home',
-                color: '#555',
-            },
-            loscantaros: {
-                short: 'Los C.',
-                long: 'Los Cantaros',
-                color: '#962',
-            },
-            saloon: {
-                short: 'Saloon',
-                long: 'Heart & Dagger Saloon',
-                color: '#822',
-            },
-            transbay: {
-                short: 'Transbay',
-                long: 'Transbay Terminal',
-                color: '#f90',
-            },
-        }}
-        routeColors={{
-            'actransit-NL': '#f99',
-        }}
-        legs = {[
-            // walking in the east bay
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'home',
-                to: 'saloon',
-                duration: 11,
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'home',
-                to: 'loscantaros',
-                duration: 6
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'loscantaros',
-                to: 'bart19th',
-                duration: 20
-            },
-
-            // walking in SF
-            {
-                spec: spec('walk', 'x', 'x'),
-                to: 'explo',
-                from: 'ferry',
-                duration: 11
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'ferry',
-                to: 'bartembroutside',
-                duration: 5
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'bartembroutside',
-                to: 'workoutside',
-                duration: 6
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'workoutside',
-                to: 'transbay',
-                duration: 4
-            },
-
-
-            // inside-outside walking
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'bartembr',
-                to: 'bartembroutside',
-                duration: 4
-            },
-            {
-                spec: spec('walk', 'x', 'x'),
-                from: 'workoutside',
-                to: 'work',
-                duration: 4
-            },
-
-            // morning bus to bart
-            // 12 to 19th st bart: 11 min; grand and staten (1011860) or los cantaros
-            // 58L to 19th st bart:  9 min; grand and perkins (los cantaros) (not weekends)
-            {
-                spec: spec('actransit', '12', '1011830'),
-                from: 'loscantaros',
-                to: 'bart19th',
-                duration: 11,
-            },
-            // evening bus from bart
-            {
-                spec: spec('actransit', '12', '1006450'),
-                from: 'bart19th',
-                to: 'loscantaros',
-                duration: 11,
-            },
-
-            // morning bart
-            {
-                spec: spec('bart', 'MLBR', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-            },
-            {
-                spec: spec('bart', 'SFIA', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-            },
-            {
-                spec: spec('bart', 'DALY', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-            },
-            // evening bart
-            {
-                spec: spec('bart', 'RICH', 'EMBR'),
-                from: 'bartembr',
-                to: 'bart19th',
-                duration: 12,
-            },
-            {
-                spec: spec('bart', 'PITT', 'EMBR'),
-                from: 'bartembr',
-                to: 'bart19th',
-                duration: 12,
-            },
-        
-            // morning transbay
-            {
-                spec: spec('actransit', 'B', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 23,
-            },
-            {
-                spec: spec('actransit', 'NL', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 31,
-            },
-            {
-                spec: spec('actransit', 'NX', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 27,
-            },
-            {
-                spec: spec('actransit', 'NL', '1011830'),
-                from: 'loscantaros',
-                to: 'transbay',
-                duration: 28,
-            },
-            // evening transbay
-            {
-                spec: spec('actransit', 'B', '1410350'),
-                from: 'transbay',
-                to: 'saloon',
-                duration: 30,
-            },
-            {
-                spec: spec('actransit', 'NL', '1410340'),
-                from: 'transbay',
-                to: 'loscantaros',
-                duration: 33,
-            },
-            {
-                spec: spec('actransit', 'NX1', '1410350'),
-                from: 'transbay',
-                to: 'saloon',
-                duration: 21,
-            },
-
-        ]}
+        networkConfig={config}
     />,
     document.getElementById('slot')
 );

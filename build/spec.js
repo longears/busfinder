@@ -1,7 +1,10 @@
 
 module.exports = function(agency, route, stop) {
-    var self = {};
+    // call in one of two ways:
+    //      spec('agency', 'route', 'stop')
+    //      spec('agency-route-stop')
 
+    var self = {};
     var sep = '-';
 
     if (arguments.length == 1) {

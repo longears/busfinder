@@ -27,43 +27,40 @@ module.exports = function() {
 
     self.locations = {}; // map from name -> {short long color}
     self.legs = []; // list of all possible legs
-    self.routeColors = {}; // map from spec.agencyRouteHash -> color
     self.maxTransitLegs = 2;
     self.maxDumbMinutes = 9; // if a trip is more than X minutes suboptimal compared to another trip, discard it
     self.maxPastLeaveMinutes = 3; // if you should have left X minutes ago, ignore
 
-    self.addLeg = function(leg) {
-        // add a leg to the config
-        // if it's "walk-x-x", add the reverse leg as well.
-        // TODO: check if it exists already
+    self.readConfig = function(config) {
+        // config should be an object like this:
+        //  {
+        //      locations: {
+        //          bartembr: {
+        //              short: 'Embr',
+        //              long: 'Embarcadero Bart',
+        //              color: '#555',
+        //          },
+        //          /* ... */
+        //      },
+        //      legs: [
+        //          {
+        //              spec: 'actransit-F-295783',
+        //              from: 'transbay',
+        //              to: 'grandlake',
+        //              duration: 35
+        //          },
+        //          /* ... */
+        //      ]
+        //  }
+        var replaceUnlessUndefined = function(attr, val) {if (self.attr === undefined) {self.attr = val;}}
+        replaceUnlessUndefined('maxTransitLegs', config.maxTransitLegs);
+        replaceUnlessUndefined('maxDumbMinutes', config.maxDumbMinutes);
+        replaceUnlessUndefined('maxPastLeaveMinutes', config.maxPastLeaveMinutes);
 
-        for (var ll=0; ll < self.legs.length; ll++) {
-            existingLeg = self.legs[ll];
-            if (   leg.spec.hash() === existingLeg.spec.hash()
-                && leg.from == existingLeg.from
-                && leg.to == existingLeg.to) {
-                logError('ERROR: duplicate leg');
-                throw 'duplicate leg';
-            }
-        }
-
-        self.legs.push(leg);
-        if (leg.spec.hash() === 'walk-x-x') {
-            self.legs.push({
-                spec: spec(leg.spec.hash()),
-                from: leg.to,
-                to: leg.from,
-                duration: leg.duration
-            });
-        }
-        if (self.locations[leg.from] === undefined) {
-            logError('ERROR: unknown location: '+leg.from);
-            throw 'unknown location: '+leg.from;
-        }
-        if (self.locations[leg.to] === undefined) {
-            logError('ERROR: unknown location: '+leg.to);
-            throw 'unknown location: '+leg.to;
-        }
+        self.locations = config.locations;
+        config.legs.map(function(leg) {
+            self._addLeg(leg);
+        });
     };
 
     //======================================================================
@@ -134,8 +131,45 @@ module.exports = function() {
     //======================================================================
     // private methods
 
+    self._addLeg = function(leg) {
+        // add a leg to the config
+        // if it's "walk-x-x", add the reverse leg as well.
+
+        if (typeof(leg.spec) === 'string') {
+            leg.spec = spec(leg.spec);
+        }
+
+        // check if it exists already
+        for (var ll=0; ll < self.legs.length; ll++) {
+            existingLeg = self.legs[ll];
+            if (   leg.spec.hash() === existingLeg.spec.hash()
+                && leg.from == existingLeg.from
+                && leg.to == existingLeg.to) {
+                logError('ERROR: duplicate leg');
+                throw 'duplicate leg';
+            }
+        }
+
+        self.legs.push(leg);
+        if (leg.spec.hash() === 'walk-x-x') {
+            self.legs.push({
+                spec: spec(leg.spec.hash()),
+                from: leg.to,
+                to: leg.from,
+                duration: leg.duration
+            });
+        }
+        if (self.locations[leg.from] === undefined) {
+            logError('ERROR: unknown location: '+leg.from);
+            throw 'unknown location: '+leg.from;
+        }
+        if (self.locations[leg.to] === undefined) {
+            logError('ERROR: unknown location: '+leg.to);
+            throw 'unknown location: '+leg.to;
+        }
+    };
+
     self._generateDot = function() {
-        // output edges
         var dot = '';
         dot += 'digraph {\n';
         dot += '    edge [len=3];\n';

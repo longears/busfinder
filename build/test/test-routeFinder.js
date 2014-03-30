@@ -5,186 +5,14 @@ var fs = require('fs');
 
 var spec = require('../spec.js');
 var routeFinder = require('../routeFinder.js');
+var config = require('../config.js');
 
 exports.test1 = nodeunit.testCase({
-    setUp: function(cb) {
+    setUp: function(callback) {
         this.rf = routeFinder();
-        this.rf.locations = {
-            work: 'work',
-            workoutside: 'work (outside)',
-            bart19th: '19th St Bart',
-            bartembr: 'Embarcadero Bart',
-            bartembroutside: 'Embarcadero Bart (outside)',
-            explo: 'Exploratorium',
-            ferry: 'Ferry Building',
-            home: 'Home',
-            loscantaros: 'Los Cantaros',
-            saloon: 'Heart & Dagger Saloon',
-            transbay: 'Transbay Terminal',
-        };
+        this.rf.readConfig(config);
 
-        // LEGS
-        // walking in the east bay
-        // these will be automatically added in the reverse direction also
-        this.rf.addLeg({
-            spec: spec('walk', 'x', 'x'),
-            from: 'home',
-            to: 'saloon',
-            duration: 11
-        });
-        this.rf.addLeg({
-            spec: spec('walk', 'x', 'x'),
-            from: 'home',
-            to: 'loscantaros',
-            duration: 6
-        });
-        this.rf.addLeg({
-            spec: spec('walk', 'x', 'x'),
-            from: 'loscantaros',
-            to: 'bart19th',
-            duration: 20
-        });
-
-        // walking in SF
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                to: 'explo',
-                from: 'ferry',
-                duration: 11
-        });
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                from: 'ferry',
-                to: 'bartembroutside',
-                duration: 5
-        });
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                from: 'bartembroutside',
-                to: 'workoutside',
-                duration: 6
-        });
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                from: 'workoutside',
-                to: 'transbay',
-                duration: 4
-        });
-
-        // inside-outside walking
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                from: 'bartembr',
-                to: 'bartembroutside',
-                duration: 4
-        });
-        this.rf.addLeg({
-                spec: spec('walk', 'x', 'x'),
-                from: 'workoutside',
-                to: 'work',
-                duration: 4
-        });
-
-        // morning bus to bart
-        // 12 to 19th st bart: 11 min; grand and staten (1011860) or los cantaros
-        // 58L to 19th st bart:  9 min; grand and perkins (los cantaros) (not weekends)
-        this.rf.addLeg({
-                spec: spec('actransit', '12', '1011830'),
-                from: 'loscantaros',
-                to: 'bart19th',
-                duration: 11,
-        });
-        // evening bus from bart
-        this.rf.addLeg({
-                spec: spec('actransit', '12', '1006450'),
-                from: 'bart19th',
-                to: 'loscantaros',
-                duration: 11,
-        });
-
-        // morning bart
-        this.rf.addLeg({
-                spec: spec('bart', 'MLBR', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-        });
-        this.rf.addLeg({
-                spec: spec('bart', 'SFIA', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-        });
-        this.rf.addLeg({
-                spec: spec('bart', 'DALY', '19TH'),
-                from: 'bart19th',
-                to: 'bartembr',
-                duration: 12,
-        });
-
-        // evening bart
-        this.rf.addLeg({
-                spec: spec('bart', 'RICH', 'EMBR'),
-                from: 'bartembr',
-                to: 'bart19th',
-                duration: 12,
-        });
-        this.rf.addLeg({
-                spec: spec('bart', 'PITT', 'EMBR'),
-                from: 'bartembr',
-                to: 'bart19th',
-                duration: 12,
-        });
-        
-        // morning transbay
-        this.rf.addLeg({
-                spec: spec('actransit', 'B', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 23,
-        });
-        this.rf.addLeg({
-                spec: spec('actransit', 'NL', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 31,
-        });
-        this.rf.addLeg({
-                spec: spec('actransit', 'NX', '9902310'),
-                from: 'saloon',
-                to: 'transbay',
-                duration: 27,
-        });
-        this.rf.addLeg({
-                spec: spec('actransit', 'NL', '1011830'),
-                from: 'loscantaros',
-                to: 'transbay',
-                duration: 28,
-        });
-        // evening transbay
-        this.rf.addLeg({
-                spec: spec('actransit', 'B', '1410350'),
-                from: 'transbay',
-                to: 'saloon',
-                duration: 30,
-        });
-        this.rf.addLeg({
-                spec: spec('actransit', 'NL', '1410340'),
-                from: 'transbay',
-                to: 'loscantaros',
-                duration: 33,
-        });
-        this.rf.addLeg({
-                spec: spec('actransit', 'NX1', '1410350'),
-                from: 'transbay',
-                to: 'saloon',
-                duration: 21,
-        });
-
-        this.rf.routeColors = {
-            'actransit-NL': '#f99'
-        };
-        cb();
+        callback();
     },
 
     '_getLegsFrom': function(test) {
@@ -259,7 +87,7 @@ exports.test1 = nodeunit.testCase({
     'getTrips returns legs that have startTimes': function(test) {
         var that = this;
         this.rf.updatePredictions(function() {
-            var trips = that.rf.getTrips('work', 'home');
+            var trips = that.rf.getTrips('a9', 'home');
             test.ok(trips instanceof Array);
             if (trips.length > 0) { // hack
                 test.ok(trips[0][0].startTime !== undefined);
