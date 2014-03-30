@@ -10,8 +10,8 @@ exports.test1 = nodeunit.testCase({
     setUp: function(cb) {
         this.rf = routeFinder();
         this.rf.locations = {
-            howardandspear: 'Howard and Spear',
-            howardandspearoutside: 'Howard and Spear (outside)',
+            work: 'work',
+            workoutside: 'work (outside)',
             bart19th: '19th St Bart',
             bartembr: 'Embarcadero Bart',
             bartembroutside: 'Embarcadero Bart (outside)',
@@ -61,12 +61,12 @@ exports.test1 = nodeunit.testCase({
         this.rf.addLeg({
                 spec: spec('walk', 'x', 'x'),
                 from: 'bartembroutside',
-                to: 'howardandspearoutside',
+                to: 'workoutside',
                 duration: 6
         });
         this.rf.addLeg({
                 spec: spec('walk', 'x', 'x'),
-                from: 'howardandspearoutside',
+                from: 'workoutside',
                 to: 'transbay',
                 duration: 4
         });
@@ -80,8 +80,8 @@ exports.test1 = nodeunit.testCase({
         });
         this.rf.addLeg({
                 spec: spec('walk', 'x', 'x'),
-                from: 'howardandspearoutside',
-                to: 'howardandspear',
+                from: 'workoutside',
+                to: 'work',
                 duration: 4
         });
 
@@ -248,8 +248,8 @@ exports.test1 = nodeunit.testCase({
     //    var that = this;
     //    this.rf.updatePredictions(function() {
     //        console.log('=== PREDICTIONS ===\\');
-    //        for (var hash in that.rf._predictions) {
-    //            console.log(hash + ':  ' + that.rf._predictions[hash].startTimes.map(function(st) {return moment(st).format('hh:mm a')}).join(', '));
+    //        for (var hash in that.rf.predictions) {
+    //            console.log(hash + ':  ' + that.rf.predictions[hash].startTimes.map(function(st) {return moment(st).format('hh:mm a')}).join(', '));
     //        }
     //        console.log('===================/');
     //        test.done()
@@ -259,7 +259,7 @@ exports.test1 = nodeunit.testCase({
     'getTrips returns legs that have startTimes': function(test) {
         var that = this;
         this.rf.updatePredictions(function() {
-            var trips = that.rf.getTrips('howardandspear', 'home');
+            var trips = that.rf.getTrips('work', 'home');
             test.ok(trips instanceof Array);
             if (trips.length > 0) { // hack
                 test.ok(trips[0][0].startTime !== undefined);

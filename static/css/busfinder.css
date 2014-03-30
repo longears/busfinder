@@ -1,173 +1,226 @@
 
+/*@import url(http://fonts.googleapis.com/css?family=Roboto+Condensed:400,300,700);*/
+/*@import url(http://fonts.googleapis.com/css?family=Cabin+Condensed:400,500,600,700);*/
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700);
+
 body {
-    background: #000;
-    color: #fff;
+    background: #e0e0e0;
+    color: #222;
     margin: 0px;
-    font-size: 18px;
-    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    font-size: 26px;
+    //font-family: "xHelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    //font-family: 'Roboto Condensed', sans-serif;
+    //font-family: 'Cabin Condensed', sans-serif;
+    font-family: 'Open Sans Condensed', sans-serif;
+    line-height: 33px;
+}
+
+a {
+    text-decoration: none;
+    display: block;
 }
 
 .overallInterfaceParent {
-    width:315px;
+    //width:315px;
+    max-width:390px;
 }
 
-.overallInterfaceChild {
+.loadingIndicatorBar {
+    height:5px;
+    border-bottom: 2px solid #222;
 }
 
-.viewChooser {
-    background: #bbb;
-    color: #000;
-    padding: 5px;
-    margin-bottom: 15px;
+    .loadingNow {
+        background: #7af;
+        background-size: 100px 100px;
+        background-image: 
+        -webkit-linear-gradient(
+            0deg, 
+            rgba(255, 255, 255, .4) 15%, 
+            transparent 15%, 
+            transparent 50%, 
+            rgba(255, 255, 255, .4) 50%, 
+            rgba(255, 255, 255, .4) 65%, 
+            transparent 65%, 
+            transparent
+        );
+                animation: animate-stripes 6s linear infinite;             
+        -webkit-animation: animate-stripes 6s linear infinite;             
+           -moz-animation: animate-stripes 6s linear infinite;             
+             -o-animation: animate-stripes 6s linear infinite;             
+    }
+    @keyframes animate-stripes {
+        from {background-position: 0 0;}
+        to {background-position: 100px 0;}
+    }
+    @-webkit-keyframes animate-stripes {
+        from {background-position: 0 0;}
+        to {background-position: 100px 0;}
+    }
+
+    .loadingStale {
+        background: #f88;
+    }
+
+.headerBar {
+    padding: 10px 0px; 
+    padding-bottom: 5px;
 }
 
-.viewName {
-    text-decoration: none;
-    color: #000;
-    display: block;
-    padding: 5px;
+    .headerCell {
+        display: inline-block;
+        margin-right: 5px;
+        vertical-align: top;
+        width: 75px;
+        text-align: right;
+    }
+    .headerCellRight {
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: top;
+        text-align: right;
+        float: right;
+    }
+
+        .headerCellSmallText {
+            font-size: 15px;
+            font-family: 'Open Sans', sans-serif;
+            line-height: normal;
+            color: #555;
+        }
+
+        .headerCellLargeText {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-left: 5px;
+        }
+
+        .faint {
+            color: #777;
+        }
+
+        .locationDropdownParent {
+            width: 70px;
+            overflow: hidden;
+            padding-left: 5px;
+            opacity: 0;
+            position: absolute;
+            margin-top: -30px;
+            font-size: 26px;
+        }
+            .locationDropdown {
+                border: 0;
+                background: transparent;
+                height: 32px;
+                width: 91px;
+                -webkit-appearance: none;
+                font-weight: bold;
+                text-align: right;
+                padding: 0px;
+                margin: 0px;
+                border-radius: 0px;
+                font-size: 26px;
+            }
+
+                .locationDropdownOption {
+                    text-align: left;
+                    font-size: 26px;
+                }
+
+    .settingsButton {
+        float: right;
+        margin-right: 5px;
+        margin-top: 12px;
+        height: 30px;
+        padding: 0px 8px;
+        border-radius: 3px;
+        background: #999;
+        text-align: center;
+        color: #eee;
+        font-size: 15px;
+        font-family: 'Open Sans', sans-serif;
+    }
+        .settingsButtonLabel {
+            display: inline-block;
+            /* vertical center */
+            position: relative;
+            top: 50%;
+            -webkit-transform: translateY(-50%);
+               -moz-transform: translateY(-50%);
+                -ms-transform: translateY(-50%);
+                 -o-transform: translateY(-50%);
+                    transform: translateY(-50%);
+        }
+
+.tripRows {
 }
 
-.currentViewName {
-    background: #fff;
-    border-radius: 5px;
+    .tripRow {
+        margin-bottom: 2px;
+        padding: 8px 0px;
+        background: #f8f8f8;
+    }
+    .tripRow:nth-child(odd) {
+    }
+
+        .tripCell {
+            display: inline-block;
+            margin-right: 5px;
+            vertical-align: top;
+        }
+
+        .tripTimeCell {
+            text-align: right;
+            width: 75px;
+        }
+
+            .tripTimeCellSmallText {
+                font-size: 15px;
+                font-family: 'Open Sans', sans-serif;
+                line-height: normal;
+                color: #777;
+            }
+
+            .tripTimeCellBigText {
+                font-size: 30px;
+                font-weight: bold;
+            }
+
+        .tripLegsCell {
+            margin-left: 20px;
+        }
+
+            .tripLegLocationAndRoute {
+            }
+                .tripLocation {
+                    vertical-align: top;
+                    margin-right: 5px;
+                    margin-top: 8px;
+                    background: #c44;
+                    color: #f0f0f0;
+                    font-size: 15px;
+                    font-family: 'Open Sans', sans-serif;
+                    display: inline-block;
+                    border-radius: 3px;
+                    padding: 7px 4px;
+                    line-height: 50%;
+                }
+
+                .tripRoute {
+                    color: #666;
+                    display: inline-block;
+                    font-weight: bold;
+                }
+
+.details {
+    color: #aaa;
+    border-top: 2px solid #222;
+    font-size: 13px;
+    padding: 15px;
+    padding-top: 30px;
+    margin-top: -2px;
+    font-family: 'Open Sans', sans-serif;
+    line-height: normal;
 }
-
-.nonCurrentViewName {
-}
-
-/*--------------------------------------------------------------------------------*/
-
-
-.boardGroup {
-    margin: 5px;
-    margin-bottom: 35px;
-    padding: 5px;
-    border-top: 2px solid #fff;
-}
-
-.boardGroupTitle {
-    font-size: 22px;
-    font-weight: bold;
-    text-align: center;
-}
-
-.boardGroupContents {
-}
-
-.boardContainer {
-}
-
-.boardHeader {
-    margin-top: 20px;
-}
-
-.boardTitle {
-    font-weight: bold;
-    color: #fff;
-}
-
-.lastUpdated {
-    float: right;
-    font-size: 24px;
-    color: #888;
-    padding-bottom: 2px;
-    -webkit-animation: rotation 7s infinite linear;
-}
-
-@-webkit-keyframes rotation {
-    from {-webkit-transform: rotate(0deg);}
-    to   {-webkit-transform: rotate(359deg);}
-}
-
-
-.walkTimeGroup {
-    margin-top: 5px;
-    margin-bottom: 8px;
-    margin-left: 10px;
-}
-
-.walkTimeLabel {
-    font-style: italic;
-    color: #999;
-    font-size: 15px;
-    display: inline;
-}
-
-.walkTimeButton {
-    text-decoration: none;
-    display: inline-block;
-    border-radius: 3px;
-    padding: 5px;
-    width: 143px;
-    text-align: center;
-}
-
-.walkTimeButtonEnabled {
-    background: #775f55;
-    color: #fff;
-}
-
-.walkTimeButtonDisabled {
-    background: #567;
-    color: #fff;
-}
-
-.busRowContainer {
-}
-
-.busRow {
-    margin-bottom: 2px;
-    padding: 5px;
-    border-radius: 3px;
-    color: #000;
-}
-
-.tooLate {
-    color: #333;
-    background: #777 !important;
-}
-
-.busRowCell {
-    display: inline-block;
-}
-
-.busRowRouteName {
-    font-size: 26px;
-    width: 50px;
-}
-
-.busRowRelativeTime {
-    font-size: 26px;
-    width: 80px;
-    font-weight: bold;
-    text-align: right;
-}
-
-.busRowAbsoluteTime {
-    font-size: 26px;
-    width: 140px;
-    text-align: right;
-}
-
-.otherLinks {
-    float: left;
-    margin-left: 15px;
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 3px;
-}
-
-.link {
-    display: block;
-    color: #9af;
-    margin: 10px;
-    text-decoration: none;
-}
-
-
-
-
-
-
-

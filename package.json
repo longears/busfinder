@@ -1,14 +1,16 @@
 {
   "name": "busfinder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Interactive web transit schedules",
   "main": "./build/routeFinder.js",
   "dependencies": {
+    "colors": "~0.6.2",
     "moment": "~2.5.1",
     "envify": "~1.2.1",
-    "superagent": "~0.17.0",
+    "react": "~0.10.0",
     "nodeunit": "~0.8.6",
-    "react": "~0.10.0"
+    "superagent": "~0.17.0",
+    "superagent-browserify": "~0.0.2"
   },
   "devDependencies": {},
   "scripts": {
@@ -16,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:longears/busfinder.git"
+    "url": "git@bitbucket.org:davidwallace/busfinder.git"
   },
   "author": "David Wallace",
   "license": "MIT"

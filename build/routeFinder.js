@@ -3,6 +3,14 @@ var request = require('superagent');
 var moment = require('moment');
 
 var spec = require('./spec.js');
+var logcolors = require('./logcolors.js')
+
+var logError = logcolors.makelog('red');
+var logMain = logcolors.makelog('green');
+var logDetails = logcolors.makelog('blue');
+var logBoring = logcolors.makelog('grey');
+
+logDetails = logBoring = function(){};
 
 // leg:
 //      spec            (for walking, use 'walk-x-x')
@@ -17,7 +25,7 @@ module.exports = function() {
     //======================================================================
     // config
 
-    self.locations = {}; // map from name -> displayName
+    self.locations = {}; // map from name -> {short long color}
     self.legs = []; // list of all possible legs
     self.routeColors = {}; // map from spec.agencyRouteHash -> color
     self.maxTransitLegs = 2;
@@ -34,7 +42,7 @@ module.exports = function() {
             if (   leg.spec.hash() === existingLeg.spec.hash()
                 && leg.from == existingLeg.from
                 && leg.to == existingLeg.to) {
-                console.log('ERROR: duplicate leg');
+                logError('ERROR: duplicate leg');
                 throw 'duplicate leg';
             }
         }
@@ -49,11 +57,11 @@ module.exports = function() {
             });
         }
         if (self.locations[leg.from] === undefined) {
-            console.log('ERROR: unknown location: '+leg.from);
+            logError('ERROR: unknown location: '+leg.from);
             throw 'unknown location: '+leg.from;
         }
         if (self.locations[leg.to] === undefined) {
-            console.log('ERROR: unknown location: '+leg.to);
+            logError('ERROR: unknown location: '+leg.to);
             throw 'unknown location: '+leg.to;
         }
     };
@@ -64,6 +72,7 @@ module.exports = function() {
     // public (read-only)
     self.pendingRequests = 0;  // don't set this from the outside, but you can read it
     self.lastCalculationMs = 0;
+    self.lastFetchTime = 0;
 
     // private
     self._predictions = {}; // map from spec.hash -> {lastUpdated, startTimes}
@@ -230,7 +239,7 @@ module.exports = function() {
         // given json from a nextbus multi-prediction style response (for a single stop),
         // return {startTimes: [...], lastUpdated: 12345}
         // if no buses, return undefined
-        console.log('    parsing '+thisSpec.hash());
+        logDetails('    parsing '+thisSpec.hash());
         var json = JSON.parse(text);
         var epochTimes = [];
         for (var ii=0; ii < json.length; ii++) {
@@ -244,7 +253,7 @@ module.exports = function() {
     };
 
     self._parseBartResponse = function(thisSpec, text) {
-        console.log('    parsing '+thisSpec.hash());
+        logDetails('    parsing '+thisSpec.hash());
         var epochTimes = [];
         var now = (new Date).getTime();
 
@@ -278,10 +287,11 @@ module.exports = function() {
 
     self.updatePredictions = function(callback) {
         // reach out to the web and update self._predictions.  when done with all ajax calls, run callback.
-        console.log('-----------------------------------------\\');
-        console.log('fetching predictions...');
+        logMain('-----------------------------------------\\');
+        logMain('fetching predictions...');
         var specHashes = self._uniqueSpecHashes();
         self.pendingRequests = 0;
+        self.erroredRequests = 0;
         for (var ss=0; ss < specHashes.length; ss++) {
             var thisSpecHash = specHashes[ss];
             var thisSpec = spec(thisSpecHash);
@@ -297,21 +307,27 @@ module.exports = function() {
             }
             self.pendingRequests += 1;
             (function(thisSpecHash, thisSpec, parseFn) {
-                console.log('  about to get '+url);
+                logDetails('  about to get '+url);
                 request
                     .get(url)
-                    .end(function(res) {
-                        console.log('    got '+url);
-                        self._predictions[thisSpecHash] = parseFn(thisSpec, res.text);
+                    .end(function(error,res) {
+                        if (error) {
+                            logDetails('    ERROR');
+                            self.erroredRequests += 1;
+                        } else {
+                            logDetails('    got '+url);
+                            self._predictions[thisSpecHash] = parseFn(thisSpec, res.text);
+                        }
 
                         // if all the ajax calls are done, run the callback.
                         self.pendingRequests -= 1;
                         if (self.pendingRequests === 0) {
-                            console.log('    ...done fetching');
-                            console.log('-----------------------------------------/');
-                            callback();
+                            logMain('    ...done fetching');
+                            logMain('-----------------------------------------/');
+                            self.lastFetchTime = (new Date).getTime();
+                            callback(self.erroredRequests);
                         } else {
-                            console.log('      '+self.pendingRequests+' still pending');
+                            logMain('      '+self.pendingRequests+' still pending');
                         }
                     });
             }(thisSpecHash, thisSpec, parseFn));
@@ -344,11 +360,24 @@ module.exports = function() {
     };
 
     self.getTrips = function(from, to) {
+
+        if (false) {
+            return JSON.parse('[[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395933506588,"endTime":1395933866588},{"spec":{"agency":"actransit","route":"12","stop":"1011830"},"from":"loscantaros","to":"bart19th","duration":11,"startTime":1395933866588,"endTime":1395934526588},{"spec":{"agency":"bart","route":"DALY","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395934750592,"endTime":1395935470592},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395935470592,"endTime":1395936670592}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395933506588,"endTime":1395933866588},{"spec":{"agency":"actransit","route":"12","stop":"1011830"},"from":"loscantaros","to":"bart19th","duration":11,"startTime":1395933866588,"endTime":1395934526588},{"spec":{"agency":"bart","route":"SFIA","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395934990299,"endTime":1395935710299},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395935710299,"endTime":1395936910299}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"saloon","duration":11,"startTime":1395933524667,"endTime":1395934184667},{"spec":{"agency":"actransit","route":"B","stop":"9902310"},"from":"saloon","to":"transbay","duration":23,"startTime":1395934184667,"endTime":1395935564667},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395935564667,"endTime":1395937124667}],'
+                +'[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395933506588,"endTime":1395933866588},{"spec":{"agency":"actransit","route":"12","stop":"1011830"},"from":"loscantaros","to":"bart19th","duration":11,"startTime":1395933866588,"endTime":1395934526588},{"spec":{"agency":"bart","route":"MLBR","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395935410462,"endTime":1395936130462},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395936130462,"endTime":1395937330462}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"bart19th","duration":26,"startTime":1395933850462,"endTime":1395935410462},{"spec":{"agency":"bart","route":"MLBR","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395935410462,"endTime":1395936130462},{"spec":{"agency":"walk","route":"x","stop":"x"},'
+                +'"from":"bartembr","to":"explo","duration":20,"startTime":1395936130462,"endTime":1395937330462}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"bart19th","duration":26,"startTime":1395934030592,"endTime":1395935590592},{"spec":{"agency":"bart","route":"DALY","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395935590592,"endTime":1395936310592},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395936310592,"endTime":1395937510592}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"saloon","duration":11,"startTime":1395933634514,"endTime":1395934294514},{"spec":{"agency":"actransit","route":"NL","stop":"9902310"},"from":"saloon","to":"transbay","duration":31,"startTime":1395934294514,"endTime":1395936154514},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395936154514,"endTime":1395937714514}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395934179922,"endTime":1395934539922},{"spec":{"agency":"actransit","route":"NL","stop":"1011830"},"from":"loscantaros","to":"transbay","duration":28,"startTime":1395934539922,"endTime":1395936219922},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395936219922,"endTime":1395937779922}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395934618103,'
+                +'"endTime":1395934978103},{"spec":{"agency":"actransit","route":"12","stop":"1011830"},"from":"loscantaros","to":"bart19th","duration":11,"startTime":1395934978103,"endTime":1395935638103},{"spec":{"agency":"bart","route":"SFIA","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395935890299,"endTime":1395936610299},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395936610299,"endTime":1395937810299}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"bart19th","duration":26,"startTime":1395934330299,"endTime":1395935890299},{"spec":{"agency":"bart","route":"SFIA","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395935890299,"endTime":1395936610299},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395936610299,"endTime":1395937810299}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395934618103,"endTime":1395934978103},{"spec":{"agency":"actransit",'
+                +'"route":"12","stop":"1011830"},"from":"loscantaros","to":"bart19th","duration":11,"startTime":1395934978103,"endTime":1395935638103},{"spec":{"agency":"bart","route":"MLBR","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395936310462,"endTime":1395937030462},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395937030462,"endTime":1395938230462}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"bart19th","duration":26,"startTime":1395934750462,"endTime":1395936310462},{"spec":{"agency":"bart","route":"MLBR","stop":"19TH"},"from":"bart19th","to":"bartembr","duration":12,"startTime":1395936310462,"endTime":1395937030462},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"bartembr","to":"explo","duration":20,"startTime":1395937030462,"endTime":1395938230462}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros",'
+                +'"duration":6,"startTime":1395935107730,"endTime":1395935467730},{"spec":{"agency":"actransit","route":"NL","stop":"1011830"},"from":"loscantaros","to":"transbay","duration":28,"startTime":1395935467730,"endTime":1395937147730},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395937147730,"endTime":1395938707730}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"saloon","duration":11,"startTime":1395934949622,"endTime":1395935609622},{"spec":{"agency":"actransit","route":"NX","stop":"9902310"},"from":"saloon","to":"transbay","duration":27,"startTime":1395935609622,"endTime":1395937229622},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395937229622,"endTime":1395938789622}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"saloon","duration":11,"startTime":1395935444038,"endTime":1395936104038},'
+                +'{"spec":{"agency":"actransit","route":"NL","stop":"9902310"},"from":"saloon","to":"transbay","duration":31,"startTime":1395936104038,"endTime":1395937964038},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395937964038,"endTime":1395939524038}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395935951926,"endTime":1395936311926},{"spec":{"agency":"actransit","route":"NL","stop":"1011830"},"from":"loscantaros","to":"transbay","duration":28,"startTime":1395936311926,"endTime":1395937991926},{"spec":{"agency":"walk","route":"x","stop":"x"},'
+                +'"from":"transbay","to":"explo","duration":26,"startTime":1395937991926,"endTime":1395939551926}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"saloon","duration":11,"startTime":1395937119322,"endTime":1395937779322},{"spec":{"agency":"actransit","route":"NL","stop":"9902310"},"from":"saloon","to":"transbay","duration":31,"startTime":1395937779322,"endTime":1395939639322},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395939639322,"endTime":1395941199322}],[{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"home","to":"loscantaros","duration":6,"startTime":1395937627210,"endTime":1395937987210},{"spec":{"agency":"actransit","route":"NL","stop":"1011830"},"from":"loscantaros","to":"transbay","duration":28,"startTime":1395937987210,"endTime":1395939667210},{"spec":{"agency":"walk","route":"x","stop":"x"},"from":"transbay","to":"explo","duration":26,"startTime":1395939667210,"endTime":1395941227210}]]');
+        }
+
+
         // given a from and to location, return a list of trips using live predictions.
         // each trip is a list of legs with startTime and endTime set.
         var calculationBeginTime = (new Date).getTime();
 
-        console.log('==================== get trips from '+from+' to '+to+' ====================');
+        logDetails('==================== get trips from '+from+' to '+to+' ====================');
 
         // first get a list of all possible trips with coalesced walk legs
         var possibleTrips = self._enumerateTrips(from, to).map(function(trip) {return self._coalesceAdjacentWalkLegs(trip)});
@@ -376,11 +405,12 @@ module.exports = function() {
         for (var pp = 0; pp < possibleTrips.length; pp++) {
             var specificTrips = [];
             var possibleTrip = possibleTrips[pp];
-            console.log('\n========== possible trip with '+possibleTrip.length+' legs');
+            logBoring();
+            logDetails('========== possible trip with '+possibleTrip.length+' legs');
 
             // ignore empty trips
             if (possibleTrip.length === 0) {
-                console.log('SKIPPING empty trip');
+                logBoring('SKIPPING empty trip');
                 continue;
             }
 
@@ -398,32 +428,33 @@ module.exports = function() {
                     remainingLegs.push(leg);
                 }
             }
-            console.log('+ finding first walk and transit legs');
-            console.log('| first walk leg:', '\n|   '+self._legToString(firstWalkLeg));
-            console.log('| first transit leg:', '\n|   '+self._legToString(firstTransitLeg));
-            console.log('| remaining legs:', '\n'+legsToString(remainingLegs, '|   '));
-            console.log();
+            logBoring('+ finding first walk and transit legs');
+            logBoring('| first walk leg:', '\n|   '+self._legToString(firstWalkLeg));
+            logBoring('| first transit leg:', '\n|   '+self._legToString(firstTransitLeg));
+            logBoring('| remaining legs:', '\n'+legsToString(remainingLegs, '|   '));
+            logBoring();
 
             // if the trip is just a single walk leg:
             if (firstTransitLeg === undefined && firstWalkLeg !== undefined) {
-                console.log('this possibleTrip is just a single walk leg');
-                specificTrips.push(clone(firstWalkLeg));
-                specificTrips[0].startTime = now;
-                specificTrips[0].endTime = now + specificTrips[0].duration * 60 * 1000;
+                logBoring('this possibleTrip is just a single walk leg');
+                var walkLeg = clone(firstWalkLeg);
+                walkLeg.startTime = now;
+                walkLeg.endTime = now + walkLeg.duration * 60 * 1000;
+                specificTrips.push([walkLeg]);
 
             } else { // the trip includes at least one transit leg
                 // if the first transit leg has no predictions, bail on the entire POSSIBLE trip
                 firstTransitLegStartTimes = self._predictions[firstTransitLeg.spec.hash()].startTimes;
                 if (firstTransitLegStartTimes.length === 0) {
-                    console.log('SKIPPING this possible trip: first transit leg has no start times (bus is not running right now)');
+                    logBoring('SKIPPING this possible trip: first transit leg has no start times (bus is not running right now)');
                     continue;
                 }
                 // for each start time of the first transit leg:
-                console.log('+ stepping through prediction times from the first transit leg');
+                logBoring('+ stepping through prediction times from the first transit leg');
                 for (var st=0; st < firstTransitLegStartTimes.length; st++) {
                     var virtualClock = firstTransitLegStartTimes[st];
                     var thisSpecificTripFailed = false;
-                    console.log('| first transit leg predicted departure at', epochTimeToHumanTime(virtualClock));
+                    logBoring('| first transit leg predicted departure at', epochTimeToHumanTime(virtualClock));
                     // make a specific trip
                     var thisSpecificTrip = [];
                     // special handling of first walk leg: slide it forward to hit the startTime
@@ -436,7 +467,7 @@ module.exports = function() {
 
                         // if first walk leg's start time is < now, bail on the entire specific trip
                         if (specificFirstWalkLeg.startTime < now - self.maxPastLeaveMinutes*60*1000) {
-                            console.log('SKIPPING this specific trip: you already missed it');
+                            logBoring('SKIPPING this specific trip: you already missed it');
                             continue;
                         }
                     }
@@ -464,7 +495,7 @@ module.exports = function() {
                             if (nextPossibleStartTimes.length === 0) {
                                 // no possible times.  bus isn't running or we got there too late.
                                 // bail on this entire specific trip.
-                                console.log('|   BAILED: no bus available for a later transit leg');
+                                logBoring('|   BAILED: no bus available for a later transit leg');
                                 thisSpecificTripFailed = true;
                                 break;
                             } else {
@@ -479,32 +510,52 @@ module.exports = function() {
 
                     // done building this specific trip
                     if (!thisSpecificTripFailed) {
-                        console.log('|   made a trip with '+thisSpecificTrip.length+' legs');
+                        logBoring('|   made a trip with '+thisSpecificTrip.length+' legs');
                         specificTrips.push(thisSpecificTrip);
                     }
 
                 } // end of "for each start time of the first transit leg"
             } // end of "else the trip contains at least one transit leg"
 
-            // TODO: clean up specificTrips to remove trips that will get us there at the same time
+            // clean up specificTrips to remove trips that will get us there at the same time ("redundant trips")
+            // sort by leaving time in reverse (latest-leaving trips first)
+            specificTrips.sort(function(a,b) {return b[0].startTime - a[0].startTime;});
+            // step through and ignore ones that have the same arrival time as the previous one
+            var prevArrival;
+            var keptSpecificTrips = [];
+            for (var tt=0; tt < specificTrips.length; tt++) {
+                var thisSpecificTrip = specificTrips[tt];
+                var thisArrival = thisSpecificTrip[thisSpecificTrip.length-1].endTime;
+                if (thisArrival !== prevArrival) {
+                    keptSpecificTrips.push(thisSpecificTrip);
+                } else {
+                    logDetails('discarded a redundant specific trip');
+                }
+                prevArrival = thisArrival;
+            }
+            specificTrips = keptSpecificTrips;
 
             // save the specificTrips we just made out of this possibleTrip
             allSpecificTrips = allSpecificTrips.concat(specificTrips);
 
             // print out the specific trips we just made out of this possibleTrip
-            console.log();
-            console.log('+ generated '+specificTrips.length+' specific trips:');
+            logBoring();
+            logDetails('+ generated '+specificTrips.length+' specific trips:');
             specificTrips.map(function(st) {
                 var duration = (st[st.length-1].endTime - st[0].startTime) / 1000 / 60;
-                console.log('| '+Math.round(duration)+' minutes:');
-                console.log(legsToString(st,'|   '));
+                logBoring('| '+Math.round(duration)+' minutes:');
+                logBoring(legsToString(st,'|   '));
             });
 
         } // end of for each possible trip
+        logBoring();
+        logBoring('done generating specific trips.');
+        logBoring();
 
-        // remove pointlessly slow trips
+        // remove "dumb trips" -- trips that have strictly better alternatives (leave later and arrive earlier)
         // sort by startTime in reverse (latest-leaving trips first)
-        allSpecificTrips.sort(function(a,b) {return b[0].startTime - a[0].startTime});
+        logBoring('+ removing pointlessly slow trips');
+        allSpecificTrips.sort(function(a,b) {return b[0].startTime - a[0].startTime;});
         var keptTrips = [];
         var bestArrivalSoFar = 9999999999999;
         for (var tt=0; tt < allSpecificTrips.length; tt++) {
@@ -512,9 +563,9 @@ module.exports = function() {
             var arrivalTime = trip[trip.length-1].endTime;
             if (arrivalTime < bestArrivalSoFar + self.maxDumbMinutes*60*1000) {
                 keptTrips.push(trip);
-                console.log('this trip: '+epochTimeToHumanTime(trip[0].startTime)+' - '+epochTimeToHumanTime(arrivalTime)+' (best so far: '+epochTimeToHumanTime(bestArrivalSoFar)+').  kept.');
+                logBoring('| trip: '+epochTimeToHumanTime(trip[0].startTime)+' - '+epochTimeToHumanTime(arrivalTime)+' (best so far: '+epochTimeToHumanTime(bestArrivalSoFar)+').  kept.');
             } else {
-                console.log('this trip: '+epochTimeToHumanTime(trip[0].startTime)+' - '+epochTimeToHumanTime(arrivalTime)+' (best so far: '+epochTimeToHumanTime(bestArrivalSoFar)+').  discarded.');
+                logBoring('| trip: '+epochTimeToHumanTime(trip[0].startTime)+' - '+epochTimeToHumanTime(arrivalTime)+' (best so far: '+epochTimeToHumanTime(bestArrivalSoFar)+').  discarded.');
             }
             if (arrivalTime < bestArrivalSoFar) {
                 bestArrivalSoFar = arrivalTime;
@@ -526,7 +577,7 @@ module.exports = function() {
         allSpecificTrips.sort(function(a,b) {return a[a.length-1].endTime - b[b.length-1].endTime});
 
         var calculationEndTime = (new Date).getTime();
-        console.log('made '+allSpecificTrips.length+' specific trips in '+(calculationEndTime-calculationBeginTime)+' ms.');
+        logDetails('made '+allSpecificTrips.length+' specific trips in '+(calculationEndTime-calculationBeginTime)+' ms.');
         self.lastCalculationMs = calculationEndTime - calculationBeginTime;
         return allSpecificTrips;
 

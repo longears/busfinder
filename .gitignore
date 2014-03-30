@@ -11,6 +11,5 @@ local/*
 
 examples_react/*
 *.png
-
-node_modules/*
+node_modules
 
