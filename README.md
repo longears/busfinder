@@ -13,7 +13,7 @@ To run:
 
 To edit the bus routes, stops, and walking times, or work on the code:
 
-* The transit network is specified in `build/config.jsx`
+* The transit network is specified in `build/config.js`
 * Run `./make-graph.sh` to generate an image of the transit network (using graphviz command line tools)
 * After making changes, run `./build.sh` to transform the jsx and bundle everything together into a single js file for the browser.
 
