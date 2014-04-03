@@ -1,9 +1,11 @@
 digraph {
     edge [len=3];
-    home -> saloon[label="walk 11m", color=orange];
-    saloon -> home[label="walk 11m", color=orange];
-    home -> loscantaros[label="walk 6m", color=orange];
-    loscantaros -> home[label="walk 6m", color=orange];
+    home -> bellevuegrand[label="walk 2m", color=orange];
+    bellevuegrand -> home[label="walk 2m", color=orange];
+    bellevuegrand -> saloon[label="walk 9m", color=orange];
+    saloon -> bellevuegrand[label="walk 9m", color=orange];
+    bellevuegrand -> loscantaros[label="walk 5m", color=orange];
+    loscantaros -> bellevuegrand[label="walk 5m", color=orange];
     loscantaros -> bart19th[label="walk 20m", color=orange];
     bart19th -> loscantaros[label="walk 20m", color=orange];
     ferry -> explo[label="walk 11m", color=orange];
@@ -25,11 +27,11 @@ digraph {
     bart19th -> bartembr[label="DALY 12m", color=blue, style=bold];
     bartembr -> bart19th[label="RICH 12m", color=blue, style=bold];
     bartembr -> bart19th[label="PITT 12m", color=blue, style=bold];
-    saloon -> transbay[label="B 23m", color=forestgreen, style=bold];
+    saloon -> transbay[label="B 20m", color=forestgreen, style=bold];
     saloon -> transbay[label="NL 31m", color=forestgreen, style=bold];
     saloon -> transbay[label="NX 27m", color=forestgreen, style=bold];
     loscantaros -> transbay[label="NL 28m", color=forestgreen, style=bold];
     transbay -> saloon[label="B 30m", color=forestgreen, style=bold];
-    transbay -> loscantaros[label="NL 33m", color=forestgreen, style=bold];
+    transbay -> loscantaros[label="NL 29m", color=forestgreen, style=bold];
     transbay -> saloon[label="NX1 21m", color=forestgreen, style=bold];
 }

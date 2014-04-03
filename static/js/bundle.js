@@ -1,5 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
+
 module.exports = {
 
     maxTransitLegs: 2, // don't allow trips to have more than this many transit legs (not counting walking legs)
@@ -11,72 +12,119 @@ module.exports = {
             short: 'A4n',
             long: 'A4n',
             color: '#555',
+            show: true,
         },
         a4noutside: {
             short: 'A4n out',
             long: 'A4n (outside)',
             color: '#555',
+            show: false,
         },
         bart19th: {
             short: '19th',
             long: '19th St Bart',
             color: '#55c',
+            show: true,
         },
         bartembr: {
             short: 'Embr',
             long: 'Embarcadero Bart',
             color: '#229',
+            show: false,
         },
         bartembroutside: {
-            short: 'Embr out',
+            short: 'Embr',
             long: 'Embarcadero Bart (outside)',
             color: '#22a',
+            show: true,
+        },
+        bellevuegrand: {
+            short: 'Bellev+Grand',
+            long: 'Bellevue & Grand',
+            color: '#555',
+            show: false,
         },
         explo: {
             short: 'Explo',
             long: 'Exploratorium',
             color: '#555',
+            show: true,
         },
         ferry: {
             short: 'Ferry',
             long: 'Ferry Building',
             color: '#555',
+            show: true,
         },
         home: {
             short: 'Home',
             long: 'Home',
             color: '#555',
+            show: true,
         },
         loscantaros: {
             short: 'Los C.',
             long: 'Los Cantaros',
             color: '#962',
+            show: true,
         },
         saloon: {
             short: 'Saloon',
             long: 'Heart & Dagger Saloon',
             color: '#822',
+            show: true,
         },
         transbay: {
             short: 'Transbay',
             long: 'Transbay Terminal',
             color: '#f90',
+            show: true,
         },
     },
 
     legs: [
+        // These are the possible legs that a trip can have.
+        //
+        // Each of these has a "spec", which specifies a particular bus stop.
+        // A spec looks like this: "actransit-12-1011830"
+        // It has three parts: agency, route, and stop number.
+        //
+        // Walking is a special case and should be entered "walk-x-x".
+        //
+        // To get AC Transit stop numbers:
+        //      1. Go to nextbus.com
+        //      2. Choose the route, direction, and stop you want
+        //      3. Look at the URL and extract this number:
+        //          http://www.nextbus.com/#!/actransit/NL/NL_147_1/1011830/1001340
+        //                                                          ^^^^^^^
+        //      4. Do this for each route at the same stop because sometimes the
+        //         stop numbers are different.  For example, the Transbay Terminal
+        //         is actually many smaller stops with different stop numbers.
+        //
+        // BART stop and route abbreviations are here:
+        //     http://api.bart.gov/docs/overview/abbrev.aspx
+        // BART uses the same abbreviations for both stops and routes, so for example
+        //     "bart-SFO-19TH"
+        // is the SFO-bound train stopping at 19th street.
+
         // walking in the east bay
         {
             spec: 'walk-x-x',
             from: 'home',
-            to: 'saloon',
-            duration: 11,
+            to: 'bellevuegrand',
+            duration: 2,
         },
         {
             spec: 'walk-x-x',
-            from: 'home',
+            from: 'bellevuegrand',
+            to: 'saloon',
+            duration: 9,
+        },
+        {
+            spec: 'walk-x-x',
+            from: 'bellevuegrand',
             to: 'loscantaros',
-            duration: 6
+            duration: 5
         },
         {
             spec: 'walk-x-x',
@@ -181,7 +229,7 @@ module.exports = {
             spec: 'actransit-B-9902310',
             from: 'saloon',
             to: 'transbay',
-            duration: 23,
+            duration: 20,
         },
         {
             spec: 'actransit-NL-9902310',
@@ -212,7 +260,7 @@ module.exports = {
             spec: 'actransit-NL-1410340',
             from: 'transbay',
             to: 'loscantaros',
-            duration: 33,
+            duration: 29,
         },
         {
             spec: 'actransit-NX1-1410350',
@@ -1043,6 +1091,8 @@ var HeaderBar = React.createClass({displayName: 'HeaderBar',
     //      handleChangeTo
     //      handleChangeFrom
     //      handleRefetch
+    //      showBart
+    //      handleToggleBart
     handleChangeFrom: function(event) {
         this.props.handleChangeFrom(event.target.value);
     },
@@ -1051,13 +1101,23 @@ var HeaderBar = React.createClass({displayName: 'HeaderBar',
     },
     render: function() {
         var now = (new Date).getTime();
+
+        // location dropdown
         var fromElems = [];
         var toElems = [];
-        var pendingElem;
-        for (var location in this.props.locations) {
-            fromElems.push(React.DOM.option( {className:"locationDropdownOption", value:location}, this.props.locations[location].short));
-            toElems.push(React.DOM.option( {className:"locationDropdownOption", value:location}, this.props.locations[location].short));
+        for (var locationKey in this.props.locations) {
+            var location = this.props.locations[locationKey];
+            if (location.show) {
+                fromElems.push(React.DOM.option( {className:"locationDropdownOption", value:locationKey}, location.short));
+                toElems.push(React.DOM.option( {className:"locationDropdownOption", value:locationKey}, location.short));
+            }
         }
+
+        // bart button
+        var bartButtonClass = 'settingsButton';
+        if (this.props.showBart) {bartButtonClass += ' settingsButtonOn';}
+        else                     {bartButtonClass += ' settingsButtonOff';}
+
         var nbsp = " ";
         return React.DOM.div( {className:"headerBar"}, 
             React.DOM.form(null, 
@@ -1082,6 +1142,9 @@ var HeaderBar = React.createClass({displayName: 'HeaderBar',
                 React.DOM.a( {className:"headerCellRight", href:"#", onClick:this.props.handleRefetch}, 
                     React.DOM.div( {className:"headerCellSmallText faint"}, "now"),
                     React.DOM.div( {className:"headerCellLargeText faint"}, moment().format('h:mm'))
+                ),
+                React.DOM.a( {className:bartButtonClass, href:"#", onClick:this.props.handleToggleBart}, 
+                    React.DOM.div( {className:"settingsButtonLabel"}, "bart")
                 )
             )
         );
@@ -1176,10 +1239,13 @@ var OverallInterface = React.createClass({displayName: 'OverallInterface',
 
         var from = 'home';
         var to = 'explo';
+        var showBart = true;
         var cookieFrom = readCookie('from');
         var cookieTo = readCookie('to');
-        if (cookieFrom !== undefined && rf.locations[cookieFrom] !== undefined) {from = cookieFrom;}
-        if (cookieTo !== undefined && rf.locations[cookieTo] !== undefined) {to = cookieTo;}
+        var cookieShowBart = readCookie('showBart');
+        if (cookieFrom !== null && rf.locations[cookieFrom] !== undefined) {from = cookieFrom;}
+        if (cookieTo !== null && rf.locations[cookieTo] !== undefined) {to = cookieTo;}
+        if (cookieShowBart !== null) {showBart = (cookieShowBart === "true");}
 
         return {
             routeFinder: rf,
@@ -1189,6 +1255,7 @@ var OverallInterface = React.createClass({displayName: 'OverallInterface',
             loadingState: 'loading',  // loading, loaded, error
             loadingStartedTime: 0,  // time of starting most recent load
             loadingFinishedTime: 0, // time of completion of last successful load
+            showBart: showBart,
         };
     },
     componentDidMount: function() {
@@ -1246,18 +1313,32 @@ var OverallInterface = React.createClass({displayName: 'OverallInterface',
     handleRefetch: function() {
         this.fetchPredictions(); // foo
     },
+    handleToggleBart: function() {
+        createCookie('showBart', (!this.state.showBart)+'', 30);
+        this.setState({showBart: !this.state.showBart});
+    },
     render: function() {
         log('render');
         var now = (new Date).getTime();
         var that=this;
-        var tripRows = this.state.trips.map(function(trip) {
-            return TripRow(
-                        {trip:trip,
-                        locations:that.state.routeFinder.locations,
-                        from:that.state.from,
-                        to:that.state.to}
-                    );
-        });
+        var tripRows = this.state.trips
+            .filter(function(trip) {
+                if (that.state.showBart) {return true;}
+                for (var ll=0; ll < trip.length; ll++) {
+                    if (trip[ll].spec.agency === 'bart') {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            .map(function(trip) {
+                return TripRow(
+                            {trip:trip,
+                            locations:that.state.routeFinder.locations,
+                            from:that.state.from,
+                            to:that.state.to}
+                        );
+            });
         return React.DOM.div(null, 
             HeaderBar(
                 {locations:this.state.routeFinder.locations,
@@ -1265,7 +1346,9 @@ var OverallInterface = React.createClass({displayName: 'OverallInterface',
                 to:this.state.to,
                 handleChangeFrom:this.handleChangeFrom,
                 handleChangeTo:this.handleChangeTo,
-                handleRefetch:this.handleRefetch}
+                handleRefetch:this.handleRefetch,
+                showBart:this.state.showBart,
+                handleToggleBart:this.handleToggleBart}
             ),
             LoadingIndicatorBar(
                 {loadingState:this.state.loadingState,

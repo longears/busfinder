@@ -112,6 +112,8 @@ var HeaderBar = React.createClass({
     //      handleChangeTo
     //      handleChangeFrom
     //      handleRefetch
+    //      showBart
+    //      handleToggleBart
     handleChangeFrom: function(event) {
         this.props.handleChangeFrom(event.target.value);
     },
@@ -120,13 +122,23 @@ var HeaderBar = React.createClass({
     },
     render: function() {
         var now = (new Date).getTime();
+
+        // location dropdown
         var fromElems = [];
         var toElems = [];
-        var pendingElem;
-        for (var location in this.props.locations) {
-            fromElems.push(<option className="locationDropdownOption" value={location}>{this.props.locations[location].short}</option>);
-            toElems.push(<option className="locationDropdownOption" value={location}>{this.props.locations[location].short}</option>);
+        for (var locationKey in this.props.locations) {
+            var location = this.props.locations[locationKey];
+            if (location.show) {
+                fromElems.push(<option className="locationDropdownOption" value={locationKey}>{location.short}</option>);
+                toElems.push(<option className="locationDropdownOption" value={locationKey}>{location.short}</option>);
+            }
         }
+
+        // bart button
+        var bartButtonClass = 'settingsButton';
+        if (this.props.showBart) {bartButtonClass += ' settingsButtonOn';}
+        else                     {bartButtonClass += ' settingsButtonOff';}
+
         var nbsp = " ";
         return <div className="headerBar">
             <form>
@@ -151,6 +163,9 @@ var HeaderBar = React.createClass({
                 <a className="headerCellRight" href="#" onClick={this.props.handleRefetch}>
                     <div className="headerCellSmallText faint">now</div>
                     <div className="headerCellLargeText faint">{moment().format('h:mm')}</div>
+                </a>
+                <a className={bartButtonClass} href="#" onClick={this.props.handleToggleBart}>
+                    <div className="settingsButtonLabel">bart</div>
                 </a>
             </form>
         </div>;
@@ -245,10 +260,13 @@ var OverallInterface = React.createClass({
 
         var from = 'home';
         var to = 'explo';
+        var showBart = true;
         var cookieFrom = readCookie('from');
         var cookieTo = readCookie('to');
-        if (cookieFrom !== undefined && rf.locations[cookieFrom] !== undefined) {from = cookieFrom;}
-        if (cookieTo !== undefined && rf.locations[cookieTo] !== undefined) {to = cookieTo;}
+        var cookieShowBart = readCookie('showBart');
+        if (cookieFrom !== null && rf.locations[cookieFrom] !== undefined) {from = cookieFrom;}
+        if (cookieTo !== null && rf.locations[cookieTo] !== undefined) {to = cookieTo;}
+        if (cookieShowBart !== null) {showBart = (cookieShowBart === "true");}
 
         return {
             routeFinder: rf,
@@ -258,6 +276,7 @@ var OverallInterface = React.createClass({
             loadingState: 'loading',  // loading, loaded, error
             loadingStartedTime: 0,  // time of starting most recent load
             loadingFinishedTime: 0, // time of completion of last successful load
+            showBart: showBart,
         };
     },
     componentDidMount: function() {
@@ -315,18 +334,32 @@ var OverallInterface = React.createClass({
     handleRefetch: function() {
         this.fetchPredictions(); // foo
     },
+    handleToggleBart: function() {
+        createCookie('showBart', (!this.state.showBart)+'', 30);
+        this.setState({showBart: !this.state.showBart});
+    },
     render: function() {
         log('render');
         var now = (new Date).getTime();
         var that=this;
-        var tripRows = this.state.trips.map(function(trip) {
-            return <TripRow
-                        trip={trip}
-                        locations={that.state.routeFinder.locations}
-                        from={that.state.from}
-                        to={that.state.to}
-                    />;
-        });
+        var tripRows = this.state.trips
+            .filter(function(trip) {
+                if (that.state.showBart) {return true;}
+                for (var ll=0; ll < trip.length; ll++) {
+                    if (trip[ll].spec.agency === 'bart') {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            .map(function(trip) {
+                return <TripRow
+                            trip={trip}
+                            locations={that.state.routeFinder.locations}
+                            from={that.state.from}
+                            to={that.state.to}
+                        />;
+            });
         return <div>
             <HeaderBar
                 locations={this.state.routeFinder.locations}
@@ -335,6 +368,8 @@ var OverallInterface = React.createClass({
                 handleChangeFrom={this.handleChangeFrom}
                 handleChangeTo={this.handleChangeTo}
                 handleRefetch={this.handleRefetch}
+                showBart={this.state.showBart}
+                handleToggleBart={this.handleToggleBart}
             />
             <LoadingIndicatorBar
                 loadingState={this.state.loadingState}

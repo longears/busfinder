@@ -131,17 +131,23 @@ a {
 
     .settingsButton {
         float: right;
-        margin-right: 5px;
-        margin-top: 12px;
+        margin-right: 10px;
+        margin-top: 21px;
         height: 30px;
         padding: 0px 8px;
         border-radius: 3px;
-        background: #999;
         text-align: center;
-        color: #eee;
         font-size: 15px;
         font-family: 'Open Sans', sans-serif;
     }
+        .settingsButtonOff {
+            background: #aaa;
+            color: #e0e0e0;
+        }
+        .settingsButtonOn {
+            background: #555;
+            color: #eee;
+        }
         .settingsButtonLabel {
             display: inline-block;
             /* vertical center */

@@ -11,56 +11,73 @@ module.exports = {
             short: 'A4n',
             long: 'A4n',
             color: '#555',
+            show: true,
         },
         a4noutside: {
             short: 'A4n out',
             long: 'A4n (outside)',
             color: '#555',
+            show: false,
         },
         bart19th: {
             short: '19th',
             long: '19th St Bart',
             color: '#55c',
+            show: true,
         },
         bartembr: {
             short: 'Embr',
             long: 'Embarcadero Bart',
             color: '#229',
+            show: false,
         },
         bartembroutside: {
-            short: 'Embr out',
+            short: 'Embr',
             long: 'Embarcadero Bart (outside)',
             color: '#22a',
+            show: true,
+        },
+        bellevuegrand: {
+            short: 'Bellev+Grand',
+            long: 'Bellevue & Grand',
+            color: '#555',
+            show: false,
         },
         explo: {
             short: 'Explo',
             long: 'Exploratorium',
             color: '#555',
+            show: true,
         },
         ferry: {
             short: 'Ferry',
             long: 'Ferry Building',
             color: '#555',
+            show: true,
         },
         home: {
             short: 'Home',
             long: 'Home',
             color: '#555',
+            show: true,
         },
         loscantaros: {
             short: 'Los C.',
             long: 'Los Cantaros',
             color: '#962',
+            show: true,
         },
         saloon: {
             short: 'Saloon',
             long: 'Heart & Dagger Saloon',
             color: '#822',
+            show: true,
         },
         transbay: {
             short: 'Transbay',
             long: 'Transbay Terminal',
             color: '#f90',
+            show: true,
         },
     },
 
@@ -93,14 +110,20 @@ module.exports = {
         {
             spec: 'walk-x-x',
             from: 'home',
-            to: 'saloon',
-            duration: 11,
+            to: 'bellevuegrand',
+            duration: 2,
         },
         {
             spec: 'walk-x-x',
-            from: 'home',
+            from: 'bellevuegrand',
+            to: 'saloon',
+            duration: 9,
+        },
+        {
+            spec: 'walk-x-x',
+            from: 'bellevuegrand',
             to: 'loscantaros',
-            duration: 6
+            duration: 5
         },
         {
             spec: 'walk-x-x',
@@ -205,7 +228,7 @@ module.exports = {
             spec: 'actransit-B-9902310',
             from: 'saloon',
             to: 'transbay',
-            duration: 23,
+            duration: 20,
         },
         {
             spec: 'actransit-NL-9902310',
@@ -236,7 +259,7 @@ module.exports = {
             spec: 'actransit-NL-1410340',
             from: 'transbay',
             to: 'loscantaros',
-            duration: 33,
+            duration: 29,
         },
         {
             spec: 'actransit-NX1-1410350',
