@@ -16,19 +16,19 @@ exports.test1 = nodeunit.testCase({
     },
 
     '_getLegsFrom': function(test) {
-        test.equal(this.rf._getLegsFrom('home').length, 2);
+        test.equal(this.rf._getLegsFrom('home').length, 1);
         test.equal(this.rf._getLegsFrom('xxx').length, 0);
         test.done();
     },
 
     '_getLegsTo': function(test) {
-        test.equal(this.rf._getLegsTo('home').length, 2);
+        test.equal(this.rf._getLegsTo('home').length, 1);
         test.equal(this.rf._getLegsTo('xxx').length, 0);
         test.done();
     },
 
     '_getLegsFromTo': function(test) {
-        test.equal(this.rf._getLegsFromTo('home','saloon').length, 1);
+        test.equal(this.rf._getLegsFromTo('saloonish','saloon').length, 1);
         test.equal(this.rf._getLegsFromTo('xxx','yyy').length, 0);
         test.done();
     },

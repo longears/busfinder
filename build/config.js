@@ -73,6 +73,12 @@ module.exports = {
             color: '#822',
             show: true,
         },
+        saloonish: {
+            short: 'Saloonish',
+            long: 'Saloonish',
+            color: '#822',
+            show: false,
+        },
         transbay: {
             short: 'Transbay',
             long: 'Transbay Terminal',
@@ -116,8 +122,14 @@ module.exports = {
         {
             spec: 'walk-x-x',
             from: 'bellevuegrand',
+            to: 'saloonish',
+            duration: 5,
+        },
+        {
+            spec: 'walk-x-x',
+            from: 'saloonish',
             to: 'saloon',
-            duration: 9,
+            duration: 4,
         },
         {
             spec: 'walk-x-x',
@@ -155,7 +167,7 @@ module.exports = {
             spec: 'walk-x-x',
             from: 'a4noutside',
             to: 'transbay',
-            duration: 4
+            duration: 2.5
         },
 
 
@@ -170,7 +182,7 @@ module.exports = {
             spec: 'walk-x-x',
             from: 'a4noutside',
             to: 'a4n',
-            duration: 4
+            duration: 2
         },
 
         // morning bus to bart
@@ -240,7 +252,7 @@ module.exports = {
             spec: 'actransit-NX-9902310',
             from: 'saloon',
             to: 'transbay',
-            duration: 27,
+            duration: 20,
         },
         {
             spec: 'actransit-NL-1011830',
@@ -253,7 +265,7 @@ module.exports = {
             spec: 'actransit-B-1410350',
             from: 'transbay',
             to: 'saloon',
-            duration: 30,
+            duration: 28.5,
         },
         {
             spec: 'actransit-NL-1410340',
@@ -265,7 +277,7 @@ module.exports = {
             spec: 'actransit-NX1-1410350',
             from: 'transbay',
             to: 'saloon',
-            duration: 21,
+            duration: 28.5,
         },
     ],
 

@@ -1,5 +1,10 @@
 
-var request = require('superagent');
+//var request = require('superagent');
+if (typeof window === 'undefined') {
+    var request = require('req'+'uest'); // browserify can't see this
+} else {
+    var request = require('browser-request'); // node won't load this
+}
 var moment = require('moment');
 
 var spec = require('./spec.js');
@@ -342,15 +347,19 @@ module.exports = function() {
             self.pendingRequests += 1;
             (function(thisSpecHash, thisSpec, parseFn) {
                 logDetails('  about to get '+url);
-                request
-                    .get(url)
-                    .end(function(error,res) {
+                request(
+                    url,
+                    function(error, response, body) {
+                // // this uses superagent
+                //request
+                //    .get(url)
+                //    .end(function(error,res) {
                         if (error) {
                             logDetails('    ERROR');
                             self.erroredRequests += 1;
                         } else {
                             logDetails('    got '+url);
-                            self._predictions[thisSpecHash] = parseFn(thisSpec, res.text);
+                            self._predictions[thisSpecHash] = parseFn(thisSpec, body);
                         }
 
                         // if all the ajax calls are done, run the callback.

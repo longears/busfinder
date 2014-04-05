@@ -2,8 +2,10 @@ digraph {
     edge [len=3];
     home -> bellevuegrand[label="walk 2m", color=orange];
     bellevuegrand -> home[label="walk 2m", color=orange];
-    bellevuegrand -> saloon[label="walk 9m", color=orange];
-    saloon -> bellevuegrand[label="walk 9m", color=orange];
+    bellevuegrand -> saloonish[label="walk 5m", color=orange];
+    saloonish -> bellevuegrand[label="walk 5m", color=orange];
+    saloonish -> saloon[label="walk 4m", color=orange];
+    saloon -> saloonish[label="walk 4m", color=orange];
     bellevuegrand -> loscantaros[label="walk 5m", color=orange];
     loscantaros -> bellevuegrand[label="walk 5m", color=orange];
     loscantaros -> bart19th[label="walk 20m", color=orange];
@@ -14,12 +16,12 @@ digraph {
     bartembroutside -> ferry[label="walk 5m", color=orange];
     bartembroutside -> a4noutside[label="walk 6m", color=orange];
     a4noutside -> bartembroutside[label="walk 6m", color=orange];
-    a4noutside -> transbay[label="walk 4m", color=orange];
-    transbay -> a4noutside[label="walk 4m", color=orange];
+    a4noutside -> transbay[label="walk 2.5m", color=orange];
+    transbay -> a4noutside[label="walk 2.5m", color=orange];
     bartembr -> bartembroutside[label="walk 4m", color=orange];
     bartembroutside -> bartembr[label="walk 4m", color=orange];
-    a4noutside -> a4n[label="walk 4m", color=orange];
-    a4n -> a4noutside[label="walk 4m", color=orange];
+    a4noutside -> a4n[label="walk 2m", color=orange];
+    a4n -> a4noutside[label="walk 2m", color=orange];
     loscantaros -> bart19th[label="12 11m", color=forestgreen, style=bold];
     bart19th -> loscantaros[label="12 11m", color=forestgreen, style=bold];
     bart19th -> bartembr[label="MLBR 12m", color=blue, style=bold];
@@ -29,9 +31,9 @@ digraph {
     bartembr -> bart19th[label="PITT 12m", color=blue, style=bold];
     saloon -> transbay[label="B 20m", color=forestgreen, style=bold];
     saloon -> transbay[label="NL 31m", color=forestgreen, style=bold];
-    saloon -> transbay[label="NX 27m", color=forestgreen, style=bold];
+    saloon -> transbay[label="NX 20m", color=forestgreen, style=bold];
     loscantaros -> transbay[label="NL 28m", color=forestgreen, style=bold];
-    transbay -> saloon[label="B 30m", color=forestgreen, style=bold];
+    transbay -> saloon[label="B 28.5m", color=forestgreen, style=bold];
     transbay -> loscantaros[label="NL 29m", color=forestgreen, style=bold];
-    transbay -> saloon[label="NX1 21m", color=forestgreen, style=bold];
+    transbay -> saloon[label="NX1 28.5m", color=forestgreen, style=bold];
 }
